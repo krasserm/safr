@@ -1,0 +1,25 @@
+  ----
+  Build
+  ----
+
+Build
+
+  SAF binaries can be built from both source releases and source snapshots. If you haven't yet installed Maven 2 download it from the Maven 2 {{{http://maven.apache.org/download.html}download page}} and follow the installation instructions.  
+
+* Prepare Building
+  
+  * <Prepare building from a source release>. {{{download.html}Download}} the latest source release, unzip the <<<safr-\<version\>-src.zip>>> file and go to the created <<<safr-\<version\>>>> directory (where <<<\<version\>>>> is the version number of the source release you downloaded).
+  
+  * <Prepare building from a source snapshot>. {{{download.html}Checkout}} the latest sources from Subversion and go to the created <<<safr>>> directory.
+  
+  []
+  
+* Build and Install
+ 
+  From the project's root directory run the command
+
++---  
+mvn install 
++---  
+  
+  This compiles all SAF modules and installs the generated artifacts to your local Maven 2 repository.

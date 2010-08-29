@@ -1,0 +1,26 @@
+  ----
+  Encryption Sample
+  ----
+
+Encryption Sample 
+
+  This sample application shows how to implement database encryption with the SAF. It uses Hibernate for OR mapping (but any other persistence framework could have been used here as well). You can find an introduction to this example in the {{{../index.html#Encryption}Encryption Developer Guide}}. For a general overview of SAF's encryption features in refer to the {{{../index.html}Security Annotation Framework home page}}. 
+
+* Browse Sources
+ 
+  * {{{xref/index.html}Main source cross-references}} 
+    
+  * {{{xref-test/index.html}Test source cross-references}} 
+   
+  []      
+
+* Download and Compile
+
+  To run the sample application {{{../download.html}download}} first the latest SAF source release and {{{../build.html}build}} it with Maven 2. You should now be in the project's root directory (<<<safr-\<version\>>>> where <<<\<version\>>>> is the version number of the source release you downloaded). Then go to the <<<safr-sample-crypto>>> sub-directory and run the command
+  
++---
+mvn test 
++---  
+  
+  This will run the sample application.
+

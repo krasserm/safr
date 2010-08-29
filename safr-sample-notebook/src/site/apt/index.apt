@@ -1,0 +1,120 @@
+  ----
+  Notebook Sample
+  ----
+
+Notebook Sample
+
+  For an introduction to the Security Annotation Framework (SAF) refer to the {{{../index.html}SAF home page}}. The introduction also discusses some of the services and domain objects used in the Notebook sample application. On this page, a brief overview of the sample application is given by demonstrating the use case of sharing a notebook between two users (see {{{#Tutorial}Tutorial}} section below).
+
+  For each notebook instance the following permissions can be assigned to individual users. Permissions lower in the table also imply permissions upper in the table (e.g. a WRITE permission also implies a READ permission).
+
+*--+--+
+|<<Permission>>|<<Descritpion>>|
+*--+--+
+|NONE|No access.|
+*--+--+
+|READ|Permission assignee can only read notbook entries but cannot create new entries or delete entries|
+*--+--+
+|WRITE|Permission assignee can read and write (create, delete) entries.| 
+*--+--+
+|MANAGE|Permission assigne can additionally delete a notebook. Creating a notebook is currently only possible for the current user (as owner) but not for other users (this is a limitation of the sample application and not of the framework).| 
+*--+--+
+|AUTH|Permission assignee can additionally manage permissions for a notebook.|
+*--+--+
+
+  You could assign these permissions to roles as well but this is not possible via the user interface yet. Refer to the JUnit integration test <<<SampleTest.java>>> to see also an example of role-based access control and role-based permission assignment. For reasons of simplicity the sample application currently doesn't persist any data. Changes made at runtime will be lost after a server restart. Later versions will also include a persistence mechanism.
+
+* Browse Sources
+ 
+  * {{{xref/index.html}Main source cross-references}}
+    
+  * {{{xref-test/index.html}Test source cross-references}} 
+   
+  []      
+  
+* Download
+ 
+  The sample application can be obtained as binary release or source release.
+
+** Binary
+
+  {{{../download.html}Download}} the latest binary release and unpack the <<<safr-\<version\>-bin.zip>>> file (where <<<\<version\>>>> is the version number of the binary release you downloaded). Deploy the extracted <<<safr-sample-notebook-\<version\>.war>>> file to a servlet container of your choice. The sample application was tested to work with Tomcat 6.0.13 and Jetty 6.1.5 but should also work with other servlet 2.4 containers.
+
+** Sources
+
+  To run the sample application from its sources {{{../download.html}download}} the latest SAF source release and {{{../build.html}build}} it with Maven 2. You should now be in the project's root directory (<<<safr-\<version\>>>> where <<<\<version\>>>> is the version number of the source release you downloaded). Then go to the <<<safr-sample-notebook/target>>> sub-directory. There you find a <<<safr-sample-notebook-\<version\>.war>>> file which you can deploy to a servlet 2.4 container.
+
+* {Tutorial}
+
+  After deploying the <<<war>>> file enter the URL <<<http://localhost:\<port\>/safr-sample-notebook-\<version\>>>> in a web browser where <<<\<port\>>>> is the port the servlet container is running and <<<\<version\>>>> is the version of the Notebook sample application. Login as <<<user1>>> with password <<<user1>>>.
+
+[images/safr-notebook-01.JPG]
+
+  A welcome page appears. Click on the "Notebook Demo" link.
+
+[images/safr-notebook-02.JPG]
+
+  This directs you to the page that lists all the notebooks for which the current user has at least <<<READ>>> permissions. Initially, each user (user1, user2 and user3) is owner of a notebook and each user has permissions to create further notebooks of which he is the owner. Without further actions no user has access to notebooks of other users. 
+
+[images/safr-notebook-03.JPG]
+
+  Click on the notebook with id <<<nb1-user1>>>. A page appears which shows the entries in this notebook. Initially the notebook is empty. Create a new entry and press <<<Save>>>
+
+[images/safr-notebook-04.JPG]
+
+  The newly created entry appears in the list of notebook entries.
+
+[images/safr-notebook-05.JPG]
+
+  Go back to the list of notebooks by clicking the <<<Notebooks>>> link. Now create a new notebook for the current user (user1) by entering the id for the notebooks to create. Here, <<<nb2-user1>>> is used. Press <<<Save>>> 
+
+[images/safr-notebook-06.JPG]
+
+  The newly created notebook appears in the list of notebooks accessible to user1. 
+
+[images/safr-notebook-07.JPG]
+
+  Click on the newly created notebook and the notebook's detail page will be shown. For this notebook we want to give <<<WRITE>>> permissions to user2. Click on the <<<Permissions>>> link. 
+
+[images/safr-notebook-08.JPG]
+
+  The list of permissions all 3 users have for this notebook are shown in a list. User2 has no access permissions to this notebook. To change this click on the <<<Change>>> link.
+
+[images/safr-notebook-09.JPG]  
+
+  You again see user2's permissions for notebook <<<nb2-user1>>> which belongs to user1.
+
+[images/safr-notebook-10.JPG]
+
+  Select <<<WRITE>>> and press <<<Save>>>.
+
+[images/safr-notebook-11.JPG]
+
+  User2 has now <<<WRITE>>> permissions to that notebook. With <<<WRITE>>> permissions you can create and delete entries in a notebook but you cannot delete the notebook itself. For deleting (and creating) notebooks you require <<<MANAGE>>> permissions. For managing the permissions for a notebook you require <<<AUTH>>> permissions.  
+
+[images/safr-notebook-12.JPG]
+
+  Now logout and login as <<<user2>>> with password <<<user2>>>.
+
+[images/safr-notebook-13.JPG]
+
+  In the list of accessible notebooks user2 can already see the notebook for which user1 gave <<<WRITE>>> permissions.
+
+[images/safr-notebook-14.JPG]
+
+  Click on <<<nb2-user1>>> and enter a greeting into the shared notebook.
+
+[images/safr-notebook-15.JPG]
+  
+  Go back to the list of notebooks by clicking on the <<<Notebooks>>> link and try to delete notebook <<<nb2-user1>>>. An error page appears that says that you (user2) don't have sufficient privileges to delete that notebook. Remember, you have been assigned <<<WRITE>>> permissions but <<<MANAGE>>> permissions are required for deleting a notebook.  
+
+[images/safr-notebook-16.JPG]
+
+  Logout and login again as <<<user1>>> with password <<<user1>>>
+
+[images/safr-notebook-17.JPG]
+
+  Select the notebook <<<nb2-user1>>> that you shared with user2 and see the greetings from user2.
+
+[images/safr-notebook-18.JPG]
+

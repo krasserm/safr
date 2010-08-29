@@ -1,0 +1,43 @@
+  ----
+  Eclipse Setup
+  ----
+
+Eclipse Setup
+
+* Version
+
+  {{{http://www.eclipse.org}Eclipse}} version 3.3 is required for working with the SAF sources version 0.9 and higher.
+
+* Plugins
+  
+  The SAF depends on the following Eclipse plugins
+  
+    * {{{http://www.eclipse.org/ajdt/downloads/}AspectJ Development Tools (AJDT) Eclipse plugin}} version 1.5.3 or higher.
+        
+    * {{{http://m2eclipse.codehaus.org/}Maven2 Eclipse plugin}}. Configure the plugin to point to your local Maven2 repository.
+
+    []
+
+  Also, you might want to install a Subversion plugin. There are several Subversion plugins available for Eclipse, a nice one is
+
+    * {{{http://subclipse.tigris.org/}Subclipse}} Subversion plugin. 
+  
+    []
+
+* Import Projects
+    
+  For setting up SAF modules in Eclipse {{{download.html}checkout}} a source release or a source snapshot from Subversion and import the source tree into Eclipse. Open the File->Import dialog and select the root directory of the SAF sources. The import dialog recognizes all SAF modules as Eclipse projects.
+  
+[images/safr-eclipse-1.jpg] Import SAF modules
+   
+  Then press the Finish button. You should see the the SAF modules as Maven2 Eclipse projects. This step may take a while if Maven2 needs to download dependencies from the {{{http://repo1.maven.org/maven2/}central Maven2 repository}}.
+  
+[images/safr-eclipse-2.jpg] Import SAF modules
+
+* Classpath Variables
+    
+  Finally, define the M2_REPO classpath variable. Open the Window->Preferences dialog. Go to Java->Build Path->Classpath Variables and press the New button. Use M2_REPO for the variable name and define the path to your local Maven2 repository. This is needed for running JUnit tests within Eclipse.
+  
+[images/safr-eclipse-3.jpg] M2_REPO variable
+  
+  Press OK.

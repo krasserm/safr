@@ -1,0 +1,38 @@
+  ----
+  Download
+  ----
+
+Download
+
+* Releases 
+
+  Binary releases and source releases can be downloaded from the {{{http://sourceforge.net/project/showfiles.php?group_id=192147}SAF download area}}. 
+  
+* Snapshots  
+
+  Source snapshots can be checked out from Subversion via
+  
++---
+svn co https://safr.svn.sourceforge.net/svnroot/safr/trunk/safr safr  
++---
+
+  This creates a <<<safr>>> folder in the current working directory which contains the sources of all SAF modules. The SAF project is a {{{http://maven.apache.org}Maven 2}} multi-module project with the following modules:
+  
+    * {{{safr-core/index.html}<<<safr-core>>>}}. The policy enforcement and encryption module.
+  
+    * {{{safr-crypto/index.html}<<<safr-crypto>>>}}. The crypto provider module.
+  
+    * {{{safr-jaas/index.html}<<<safr-jaas>>>}}. The policy decision module.
+  
+    * {{{safr-sample-crypto/index.html}<<<safr-sample-crypto>>>}}. The Encryption sample application.
+  
+    * {{{safr-sample-hellosaf/index.html}<<<safr-sample-hellosaf>>>}}. The Hello SAF sample application.
+  
+    * {{{safr-sample-notebook/index.html}<<<safr-sample-notebook>>>}}. The Notebook sample application.
+  
+    []
+  
+* Next Steps
+
+  {{{build.html}Build}} the SAF modules from source. 
+

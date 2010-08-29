@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="src/main/resources" path="src/main/resources"/>
+	<classpathentry excluding="**" kind="src" output="src/test/resources" path="src/test/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
+	<classpathentry kind="var" path="M2_REPO/net/sourceforge/safr/safr-core/1.0-SNAPSHOT/safr-core-1.0-SNAPSHOT.jar">
+		<attributes>
+			<attribute name="org.eclipse.ajdt.aspectpath" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

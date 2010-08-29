@@ -1,0 +1,28 @@
+<assembly>
+  <id>bin</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>true</includeBaseDirectory>
+  <moduleSets>
+    <moduleSet>
+      <includes>
+        <include>net.sourceforge.safr:safr-core</include>
+        <include>net.sourceforge.safr:safr-crypto</include>
+        <include>net.sourceforge.safr:safr-jaas</include>
+        <include>net.sourceforge.safr:safr-sample-notebook</include>
+      </includes>
+      <binaries>
+        <includeDependencies>false</includeDependencies>
+        <unpack>false</unpack>
+      </binaries>
+    </moduleSet>
+  </moduleSets>
+  <fileSets>
+    <fileSet>
+      <includes>
+        <include>license.txt</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+</assembly>

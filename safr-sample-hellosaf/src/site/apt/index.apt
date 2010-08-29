@@ -1,0 +1,323 @@
+  ----
+  Hello SAF Sample
+  ----
+
+Hello SAF Sample 
+
+  This tutorial shows the basic steps for setting up the {{{../safr-core/index.html}SAF Core}} module in {{{http://www.springframework.org}Spring}} applications. It shows how to configure the module within a Spring application context XML file and how to apply security annotations to domain objects and Spring beans. The sample application implements an <<<AccessManager>>> with over-simplified, static authorization decision rules that do not consider users or roles. For setting up an application with the {{{../safr-jaas/index.html}SAF JAAS}} authorization provider refer to the {{{../safr-sample-notebook/index.html}Notebook}} sample.
+
+* Browse Sources
+ 
+  * {{{xref/index.html}Main source cross-references}}
+    
+  * {{{xref-test/index.html}Test source cross-references}} 
+   
+  []      
+  
+* Download and Compile
+
+  To run the sample application {{{../download.html}download}} first the latest SAF source release and {{{../build.html}build}} it with Maven 2. You should now be in the project's root directory (<<<safr-\<version\>>>> where <<<\<version\>>>> is the version number of the source release you downloaded). Then go to the <<<safr-sample-hellosaf>>> sub-directory and run the command
+  
++---
+mvn test 
++---  
+  
+  This will run the sample application.
+  
+* Annotations
+  
+  We start by defining a sample domain object (<<<DomainObject>>>) for which permission checks shall be enforced. The domain object defines an id attribute which can be set at construction time. Authorization decisions will be based on that id. 
+
++---
+@SecureObject
+public class DomainObject {
+
+    private long id;
+    
+    public DomainObject(long id) {
+        this.id = id;
+    }
+    
+    public long getId() {
+        return id;
+    }
+    
+    @Secure(SecureAction.UPDATE)
+    public void update() {
+        // update (modify) this domain object ...
+    }
+    
+    ...    
+}
++---
+
+  Since domain objects aren’t managed by a Spring application context we add a <<<@SecureObject>>> annotation on class-level. Only classes with <<<@SecureObject>>> annotations are weaved by the AspectJ compiler. The domain object defines an update() method that is annotated with <<<@Secure(SecureAction.UPDATE)>>>. When we invoke this method on a domain object instance then the SAF calls <<<AccessManager.checkUpdate()>>> passing that instance as argument to <<<checkUpdate()>>>.
+
+  In a next step we define a service interface and an implementation class with methods that operate on domain objects. <<<findDomainObject()>>> and <<<findDomainObjects()>>> return domain objects, <<<deleteDomainObject()>>> has a <<<DomainObject>>> parameter. For the first two methods we want to check whether a caller has read permissions for the returned domain objects. Therefore, a <<<@Filter>>> annotation is added. 
+
++---
+public interface Service {
+
+    @Filter DomainObject findDomainObject(long id);
+    @Filter List<DomainObject> findDomainObjects(long... ids);
+    void deleteDomainObject(@Secure(SecureAction.DELETE)DomainObject obj);
+}
++---
+
+  The <<<@org.springframework.stereotype.Service>>> annotation of <<<ServiceImpl>>> is part of the Spring Framework since version 2.5. We use the annotation to load the service bean from the classpath (for more details refer to the {{{../index.html}SAF home page}}). 
+
++---
+package net.sourceforge.safr.sample.hellosaf;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@org.springframework.stereotype.Service
+public class ServiceImpl implements Service {
+
+    public DomainObject findDomainObject(long id) {
+        return new DomainObject(id);
+    }
+
+    public List<DomainObject> findDomainObjects(long... ids) {
+        ArrayList<DomainObject> result = new ArrayList<DomainObject>();
+        for (long id : ids) {
+            result.add(new DomainObject(id));
+        }
+        return result;
+    }
+
+    public void deleteDomainObject(DomainObject obj) {
+        // delete domain object (from database) ...
+    }
+
+}
++---
+
+  For <<<findObject()>>> the SAF calls <<<AccessManager.checkRead()>>>. It passes the object returned by <<<findObject()>>> as argument to <<<checkRead()>>>. If <<<checkRead()>>> throws an <<<AccessControlException>>> null will be returned from a <<<findObject()>>> call otherwise a domain object is returned. For <<<findDomainObjects()>>> the SAF calls <<<AccessManager.checkRead()>>> for every domain object in the result list. If <<<checkRead()>>> throws an <<<AccessControlException>>> the SAF will not add the affected object to the result. For <<<deleteDomainObject()>>> we want to check whether the caller has permissions to delete the domain object instance that is passed as argument to this method. When the method is invoked the SAF calls <<<AccessManager.checkDelete()>>>. It passes the <<<deleteDomainObject()>>> call-argument as argument to <<<checkDelete()>>>. An <<<AccessControlException>>> thrown by <<<checkDelete()>>> will not be handled by the SAF; this must be done by the caller. The SAF only handles <<<AccessControlException>>>s with <<<@Filter>>> annotations.
+
+  Let’s look at the <<<AccessManagerImpl>>> class. It implements authorization decision logic that only allows create, read, update and delete actions on domain objects with <<<id>>>s less than 10. For all other <<<id>>>s <<<AccessControlException>>>s will be thrown. There's also a type-level annotation <<<@PolicyDecisionPoint>>>. If you use the component-scanning feature of Spring 2.5 (or higher) classes annotated with <<<@PolicyDecisionPoint>>> are loaded into the Spring application context as bean with name "accessManager" (default). The bean name can be customized by defining an annotation value. For example, <<<@PolicyDecisionPoint("myBean")>>> creates a bean with name "myBean".   
+  
++---
+package net.sourceforge.safr.sample.hellosaf;
+
+import java.security.AccessControlException;
+
+import net.sourceforge.safr.core.invocation.MethodInvocation;
+import net.sourceforge.safr.core.invocation.ProceedingInvocation;
+import net.sourceforge.safr.core.provider.AccessManager;
+import net.sourceforge.safr.core.spring.annotation.PolicyDecisionPoint;
+
+/**
+ * @author Martin Krasser
+ */
+@PolicyDecisionPoint
+public class AccessManagerImpl implements AccessManager {
+
+    public void checkCreate(Object obj) {
+        checkObject(obj);
+    }
+
+    public void checkRead(Object obj) {
+        checkObject(obj);
+    }
+
+    public void checkUpdate(Object obj) {
+        checkObject(obj);
+    }
+
+    public void checkDelete(Object obj) {
+        checkObject(obj);
+    }
+
+    ...
+
+    private void checkObject(Object obj) {
+        DomainObject domainObject = (DomainObject)obj;
+        if (domainObject.getId() > 9) {
+            throw new AccessControlException("access to domain object with id "
+                    + domainObject.getId() + " denied");
+        }
+        
+    }
+}
++---
+
+* Spring Configuration
+
+  In the Spring application context XML file, we activate the {{{../safr-core/index.html}SAF Core}} module with the <<<\<sec:annotation-driven\>>>> element. The <<<access-manager>>> attribute references the <<<accessManager>>> bean. We also define <<<ServiceImpl>>> as a bean.
+
++---
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:sec="http://safr.sourceforge.net/schema/core"
+    xsi:schemaLocation="
+http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://safr.sourceforge.net/schema/core 
+http://safr.sourceforge.net/schema/core/spring-safr-core-1.0.xsd">
+
+    <sec:annotation-driven access-manager="accessManager" />
+
+    <bean id="accessManager"
+        class="net.sourceforge.safr.sample.hellosaf.AccessManagerImpl" />
+
+    <bean id="service"
+        class="net.sourceforge.safr.sample.hellosaf.ServiceImpl" />
+
+</beans>
++---
+
+  You may also want to use the new Spring features available since version 2.5 to configure the SAF. The following application context XML file loads all beans from the classpath starting at the package root <<<net.sourceforge.safr.sample.hellosaf>>>. In our example, this will load <<<AccessManagerImpl>>> (annotated with <<<@PolicyDecisionPoint>>>) and <<<ServiceImpl>>> (annotated with <<<@Service>>>). The <<<access-manager>>> attribute of <<<\<sec:annotation-driven\>>>> is not defined because we're using the default bean name for the access manager bean. 
+
++---
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ctx="http://www.springframework.org/schema/context"
+    xmlns:sec="http://safr.sourceforge.net/schema/core"
+    xsi:schemaLocation="
+http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/context 
+http://www.springframework.org/schema/context/spring-context-2.5.xsd
+http://safr.sourceforge.net/schema/core 
+http://safr.sourceforge.net/schema/core/spring-safr-core-1.0.xsd">
+
+    <ctx:component-scan base-package="net.sourceforge.safr.sample.hellosaf"/>
+
+    <sec:annotation-driven />
+
+</beans>
++---
+
+* Dependencies
+
+  In the <<<pom.xml>>> add a dependency to the <<<safr-core-\<version\>.jar>>> jar file where <<<\<version\>>>> is the version number of the source release you downloaded. In this example it is <<<0.9>>>.
+
++---
+  <dependencies>
+      ...
+      <dependency>
+          <groupId>net.sourceforge.safr</groupId>
+          <artifactId>safr-core</artifactId>
+          <version>0.9</version>
+      </dependency>
+  </dependencies>
++---
+
+* AspectJ Settings
+
+  Before we can test our sample application we have to tell the AspectJ compiler to use the <<<safr-core-0.9.jar>>> file as aspect library. With the {{{http://mojo.codehaus.org/aspectj-maven-plugin/}AspectJ Maven 2 plugin}} this can be done via the following configuration in the <<<pom.xml>>> file.
+
++---
+  <build>
+      <plugins>
+          ...
+          <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>aspectj-maven-plugin</artifactId>
+              <configuration>
+                  ...
+                  <aspectLibraries>
+                      <aspectLibrary>
+                          <groupId>net.sourceforge.safr</groupId>
+                          <artifactId>safr-core</artifactId>
+                      </aspectLibrary>
+                  </aspectLibraries>
+              </configuration>
+              <executions>
+                  <execution>
+                      <goals>
+                          <goal>compile</goal>
+                      </goals>
+                  </execution>
+             </executions>
+          </plugin>
+      </plugins>
+  </build>
++---
+
+
+  To use AspectJ directly in Eclipse you must install the {{{http://www.eclipse.org/ajdt/}AspectJ Development Tools}} (AJDT). After installation, convert the Eclipse project you are working on to an AspectJ project and open the project properties. Under the <AspectJ Build> menu add the <<<safr-core-0.9.jar>>> file to the <Aspect Path>. The classpath variable <<<M2_REPO>>> refers to the local Maven 2 repository
+
+[images/safr-sample-hellosaf-1.jpg] Eclipse AspectJ Settings
+
+* Unit Tests
+
+  Finally, here’s the {{{http://www.junit.org}Junit4}} test code of our sample application. Spring's new test framework is used that is available since version 2.5.
+
++---
+package net.sourceforge.safr.sample.hellosaf;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.security.AccessControlException;
+import java.util.List;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={"/context.xml"})
+@TestExecutionListeners({DependencyInjectionTestExecutionListener.class})
+public class SampleTest {
+
+    @Autowired
+    private Service service;
+    
+    @Test
+    public void testFindDomainObject() {
+        DomainObject result = service.findDomainObject(1);
+        assertNotNull(result);
+        result = service.findDomainObject(11);
+        assertNull(result);
+    }
+
+    @Test
+    public void testFindDomainObjects() {
+        List<DomainObject> result = service.findDomainObjects(2, 3, 4);
+        assertEquals(3, result.size());
+        result = service.findDomainObjects(2, 3, 14);
+        assertEquals(2, result.size());
+        assertTrue(result.contains(new DomainObject(2)));
+        assertTrue(result.contains(new DomainObject(3)));
+        result = service.findDomainObjects(12, 13, 14);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testDeleteDomainObject() {
+        service.deleteDomainObject(new DomainObject(5));
+        try {
+            service.deleteDomainObject(new DomainObject(15));
+            fail();
+        } catch (AccessControlException e) {
+            // expected
+        }
+        
+    }
+
+    @Test
+    public void testUpdate() {
+        new DomainObject(6).update();
+        try {
+            new DomainObject(16).update();
+            fail();
+        } catch (AccessControlException e) {
+            // expected
+        }
+    }
+    
+}
++---
