@@ -1,3 +1,7 @@
 The Security Annotation Framework (SAF) is a framework for instance-level access control and field-level encryption. Access-control decisions at class-instance-level and crypto operations at field-level are enforced using Java 5 annotations. The SAF defines service provider interfaces (SPI) to be implemented by authorization providers and crypto providers. Authorization providers decide for individual class-instances (e.g. domain object instances application) if access shall be granted or not. Similarly, encryption providers are repsonsible for encrypting and decrypting field values of objects.
 
 Learn more at "http://safr.sourceforge.net/":http://safr.sourceforge.net/
+
+h2. History
+
+The project was originally developed at the "Sourceforge Subversion repository":https://safr.svn.sourceforge.net/svnroot/safr. The project history has been not been imported. 
